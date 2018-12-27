@@ -1,4 +1,4 @@
-# MostEngagedFollowers
+# Most Engaged Followers
 Get a ranking of the most engaged followers on an Instagram page
 
 # Usage
