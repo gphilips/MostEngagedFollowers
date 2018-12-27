@@ -91,50 +91,51 @@ var scrolled = 0;
 var scrollDelta = null;
 
 if (!user)
-    errorCli("You forget to add" + "--user=\[username\]");
+    errorCli("You forget to add" + " --user=\[username\]");
+else {
+    console.log("/******************************");
+    console.log("  ✨ Let's scrape "+ user + " ✨");
+    console.log("******************************/\n");    
 
-console.log("/******************************");
-console.log("  ✨ Let's scrape "+ user + " ✨");
-console.log("******************************/\n");
-
-casper.start('https://www.instagram.com/' + user, function() {
-    if (!this.exists("div.nZSzR > h1"))
-        errorCli("The page doesn't exist");
-    
-    scrollPage();     
-    this.then(function () {
-        links = this.evaluate(getAllPicLink);
-        nbPics = links.length;
-        var j = 1;
-        for (var i=0; i < nbPics; i++) {
-            console.log("Opening picture "+ (i + 1) + "...")
-            this
-                .thenOpen(links[i])
-                .wait(1000)
-                .then(function() {
-                    this.click("section.EDfFK.ygqzn > div > div > a");
-                })
-                .wait(1000)
-                .then(function() {
-                    console.log("Getting likes of picture " + j +"...");
-                    scrollPage();
-                    j++;
-                })
-                .then(function() {
-                    var likes = this.evaluate(getLikedBy);
-                    console.log("Retrieved " + likes.length + " likes");
-                    likedBy.push(likes);
-                })
-        }
+    casper.start('https://www.instagram.com/' + user, function() {
+        if (!this.exists("div.nZSzR > h1"))
+            errorCli("The page doesn't exist");
+        
+        scrollPage();     
+        this.then(function () {
+            links = this.evaluate(getAllPicLink);
+            nbPics = links.length;
+            var j = 1;
+            for (var i=0; i < nbPics; i++) {
+                console.log("Opening picture "+ (i + 1) + "...")
+                this
+                    .thenOpen(links[i])
+                    .wait(1000)
+                    .then(function() {
+                        this.click("section.EDfFK.ygqzn > div > div > a");
+                    })
+                    .wait(1000)
+                    .then(function() {
+                        console.log("Getting likes of picture " + j +"...");
+                        scrollPage();
+                        j++;
+                    })
+                    .then(function() {
+                        var likes = this.evaluate(getLikedBy);
+                        console.log("Retrieved " + likes.length + " likes");
+                        likedBy.push(likes);
+                    })
+            }
+        })
+        .then(function() {
+            var result = sortByScore(likedBy);
+            fs.write("engagedFollowers.txt", JSON.stringify(result, null, 2), 'w');
+            console.log("\n/***********************************************************");
+            console.log("                       ✨  FINISH ! ✨");
+            console.log(' Your data has been saved in the file "engagedFollowers.txt"');
+            console.log("***********************************************************/\n");
+        })
     })
-    .then(function() {
-        var result = sortByScore(likedBy);
-        fs.write("engagedFollowers.txt", JSON.stringify(result, null, 2), 'w');
-        console.log("\n/***********************************************************");
-        console.log("                       ✨  FINISH ! ✨");
-        console.log(' Your data has been saved in the file "engagedFollowers.txt"');
-        console.log("***********************************************************/\n");
-    })
-})
 
-casper.run();
+    casper.run();
+}
